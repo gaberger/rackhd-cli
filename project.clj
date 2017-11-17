@@ -11,5 +11,5 @@
                  [lambdaisland/uri "1.1.0"]
                  [org.clojure/tools.cli "0.3.5"]]
 
-  :main dell-taskgraph-cli.core
-  :aot [dell-taskgraph-cli.core])
+  :main rackhd-cli.core
+  :aot [rackhd-cli.core])

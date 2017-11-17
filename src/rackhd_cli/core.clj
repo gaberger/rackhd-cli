@@ -101,7 +101,7 @@
       (:help options) {:exit-message (usage summary) :ok? true}
       errors
       {:exit-message (error-msg errors)}
-      (#{"tasks" "graphs"} (first arguments))
+      (#{"tasks" "graphs" "nodes"} (first arguments))
       {:action (first arguments) :options options :arguments (next arguments)}
       :else                                                 ; failed custom validation => exit with usage summary
       {:exit-message (sub-command-usage summary)})))
@@ -112,18 +112,21 @@
   #_(System/exit status))
 
 (defn list-command [uri]
-  (let [result (get-url uri)]
+  (let [result (get-url uri)
+        _ (println "DEBUG: " result)]
     (pprint/print-table (map #(select-keys % [:instanceId :_status :friendlyName :injectableName]) result))))
 
-(defn list-handler [args]
-  (let [{:keys [action options arguments exit-message ok?]} (validate-list-args args)]
+(defn list-handler [options args]
+  (let [{:keys [action _ arguments exit-message ok?]} (validate-list-args args)]
        (if exit-message
           (exit (if ok? 0 1) exit-message)
           (let [path (api (keyword action))
-                uri (str (assoc (uri "") :scheme "http" :host (:hostname options) :port (:port options) :path path))]
+                uri (str (assoc (uri "") :scheme "http" :host (:hostname options) :port (:port options) :path path))
+                _ (println "Executing request to: " uri)]
             (case action
               "tasks" (list-command uri)
               "graphs" (list-command uri)
+              "nodes" (list-command uri)
               (println (str "Error shouldnt be here")))))))
 
 (defn get-command [uri]
@@ -142,8 +145,8 @@
 ;      (println (str "Error: " arg " not found")))))
 
 
-(defn get-handler [args]
-  (let [{:keys [action options arguments exit-message ok?]} (validate-list-args args)]
+(defn get-handler [options args]
+  (let [{:keys [action _ arguments exit-message ok?]} (validate-list-args args)]
     (if exit-message
       (exit (if ok? 0 1) exit-message)
       (let [path (api (keyword action))
@@ -160,6 +163,10 @@
     (if exit-message
       (exit (if ok? 0 1) exit-message)
       (case action
-        "list" (list-handler arguments)
-        "get"  (get-handler arguments)
+        "list" (list-handler options arguments)
+        "get"  (get-handler  options arguments)
         "create" (str "create " options)))))
+
+
+
+
